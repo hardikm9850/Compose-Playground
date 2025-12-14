@@ -1,4 +1,4 @@
-package com.hardik.composeplayground.ui.theme
+package com.hardik.core.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

@@ -1,4 +1,4 @@
-package com.hardik.composeplayground.ui.theme
+package com.hardik.core.theme
 
 import androidx.compose.ui.graphics.Color
 
