@@ -36,6 +36,38 @@ jobs:
       - name: Run Unit Tests
         run: ./gradlew testDebugUnitTest
 
+      - name: Generate JaCoCo Coverage Report
+        run: ./gradlew jacocoProjectReport
+
+      - name: Upload Coverage Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: |
+            build/reports/jacoco/project/html/
+            build/reports/jacoco/project/jacocoProjectReport.xml
+          retention-days: 30
+
+      - name: Add Coverage Comment to PR
+        if: github.event_name == 'pull_request'
+        uses: madrapps/jacoco-report@v1.6.1
+        with:
+          paths: ${{ github.workspace }}/build/reports/jacoco/project/jacocoProjectReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 40
+          min-coverage-changed-files: 60
+          title: 'Code Coverage Report'
+          update-comment: true
+
+      - name: Generate Coverage Badge
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+        uses: cicirello/jacoco-badge-generator@v2
+        with:
+          jacoco-csv-file: build/reports/jacoco/project/jacocoProjectReport.csv
+          badges-directory: .github/badges
+          generate-branches-badge: true
+          generate-summary: true
+
       - name: Run Android Lint
         run: ./gradlew lintDebug
 
@@ -44,3 +76,13 @@ jobs:
 
       - name: Verify outputs
         run: ls -R app/build/outputs
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            **/build/reports/tests/
+            **/build/test-results/
+          retention-days: 30

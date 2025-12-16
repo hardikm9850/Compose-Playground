@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.android.library) apply false
     alias(libs.plugins.dependency.analysis)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.jacoco)
 }
 detekt {
     buildUponDefaultConfig = true
@@ -16,3 +17,4 @@ detekt {
     config = files("${rootDir}/detekt.yml")
 
 }
+apply(from = "$rootDir/config/gradle/jacoco.gradle")

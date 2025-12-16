@@ -1,0 +1,170 @@
+apply plugin: 'jacoco'
+jacoco {
+    toolVersion = "0.8.12"
+}
+// =======================
+// Common exclusion patterns
+// =======================
+def jacocoExcludes = [
+        '**/R.class',
+        '**/R$*.class',
+        '**/BuildConfig.*',
+        '**/Manifest*.*',
+        '**/*Test*.*',
+        'android/**/*.*',
+        '**/*$ViewInjector*.*',
+        '**/*$ViewBinder*.*',
+        '**/databinding/*',
+        '**/android/databinding/*',
+        '**/androidx/databinding/*',
+        '**/BR.*',
+        '**/Dagger*.*',
+        '**/*_MembersInjector.class',
+        '**/*_Factory.class',
+        '**/*_Provide*Factory.class',
+        '**/*Module_*Factory.class',
+        '**/*LambdaLambda',
+        'Lambda*.*',
+        '**/*Companion.*',
+        '**/*$Result.*',
+        '**/*ResultResult',
+        'Result*.*',
+        '**/*∗*',
+        '∗*.*'
+]
+
+// =======================
+// Module-level Jacoco tasks (Debug only)
+// =======================
+subprojects.each { sub ->
+    sub.afterEvaluate {
+// Only Android modules
+        if (sub.plugins.hasPlugin('com.android.application') || sub.plugins.hasPlugin('com.android.library')) {
+            def variantName = "Debug"
+            def testTaskName = "test${variantName}UnitTest"
+
+            sub.tasks.register("jacocoDebugReport", JacocoReport) {
+                dependsOn(sub.tasks.findByName(testTaskName))
+
+                group = "Reporting"
+                description = "Generate Jacoco Debug report for ${sub.name}"
+
+                classDirectories.setFrom(files([
+                        fileTree(dir: "${sub.buildDir}/intermediates/javac/debug/classes", excludes: jacocoExcludes),
+                        fileTree(dir: "${sub.buildDir}/tmp/kotlin-classes/debug", excludes: jacocoExcludes)
+                ]).filter { it.exists() })
+
+                sourceDirectories.setFrom(files([
+                        "${sub.projectDir}/src/main/java",
+                        "${sub.projectDir}/src/main/kotlin"
+                ]).filter { it.exists() })
+
+                executionData.setFrom(files([
+                        fileTree(dir: sub.buildDir, includes: [
+                                "**/jacoco/${testTaskName}.exec",
+                                "**/outputs/unit_test_code_coverage/debugUnitTest/${testTaskName}.exec"
+                        ])
+                ]).filter { it.exists() })
+
+                reports {
+                    xml.required = true
+                    html.required = true
+                    csv.required = true
+                    html.outputLocation = file("${sub.buildDir}/reports/jacoco/debug")
+                }
+
+                doLast {
+                    println "Jacoco report for ${sub.name} generated at: ${reports.html.outputLocation.get()}/index.html"
+                }
+            }
+        }
+    }
+}
+// =======================
+// Root-level aggregated Jacoco report
+// =======================
+tasks.register("jacocoProjectReport", JacocoReport) {
+    group = "Reporting"
+    description = "Aggregated Jacoco report for all modules"
+// Depend on all module-level reports
+    dependsOn(subprojects.collect { it.tasks.matching { it.name == 'jacocoDebugReport' } })
+
+// Collect all execution files
+    def allExecs = subprojects.collect { sub ->
+        fileTree(dir: sub.buildDir, includes: [
+                '**/jacoco/*.exec',
+                '**/outputs/unit_test_code_coverage/**/*.exec'
+        ])
+    }
+    executionData.setFrom(files(allExecs).filter { it.exists() })
+
+// Collect all class files
+    def allClasses = subprojects.collect { sub ->
+        files([
+                fileTree(dir: "${sub.buildDir}/intermediates/javac/debug/classes", excludes: jacocoExcludes),
+                fileTree(dir: "${sub.buildDir}/tmp/kotlin-classes/debug", excludes: jacocoExcludes)
+        ])
+    }.flatten()
+    classDirectories.setFrom(files(allClasses).filter { it.exists() })
+
+// Collect all source directories
+    def allSources = subprojects.collect { sub ->
+        files(
+                "${sub.projectDir}/src/main/java",
+                "${sub.projectDir}/src/main/kotlin"
+        )
+    }.flatten()
+    sourceDirectories.setFrom(files(allSources).filter { it.exists() })
+
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = true
+        html.outputLocation = file("$buildDir/reports/jacoco/project")
+    }
+
+    doLast {
+        println "Aggregated Jacoco report generated at: ${reports.html.outputLocation.get()}/index.html"
+    }
+}
+// =======================
+// Convenience task to open report in browser
+// =======================
+tasks.register("openCoverageReport") {
+    group = "Reporting"
+    description = "Opens the aggregated HTML coverage report in browser"
+    dependsOn(tasks.named("jacocoProjectReport"))
+
+    doLast {
+        def reportFile = file("$buildDir/reports/jacoco/project/html/index.html")
+        if (reportFile.exists()) {
+            println "Opening coverage report: ${reportFile.absolutePath}"
+
+            // Cross-platform way to open file
+            def os = System.getProperty('os.name').toLowerCase()
+            if (os.contains('mac')) {
+                exec { commandLine 'open', reportFile }
+            } else if (os.contains('windows')) {
+                exec { commandLine 'cmd', '/c', 'start', reportFile }
+            } else {
+                exec { commandLine 'xdg-open', reportFile }
+            }
+        } else {
+            println "Report not found at: ${reportFile.absolutePath}"
+            println "Make sure the jacocoProjectReport task completed successfully."
+        }
+    }
+}
+// =======================
+// Task to run tests and generate coverage in one command
+// =======================
+tasks.register("testWithCoverage") {
+    group = "Verification"
+    description = "Run all debug unit tests and generate coverage report"
+    dependsOn(subprojects.collect { it.tasks.matching { it.name == 'testDebugUnitTest' } })
+    finalizedBy(tasks.named("jacocoProjectReport"))
+
+    doLast {
+        println "✅ Tests completed. Coverage report will be generated next."
+    }
+}

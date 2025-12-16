@@ -3,7 +3,9 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.jacoco)
 }
+apply(from = "$rootDir/config/gradle/jacoco.gradle")
 
 android {
     namespace = "com.hardik.composeplayground"
