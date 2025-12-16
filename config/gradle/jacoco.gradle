@@ -1,7 +1,9 @@
 apply plugin: 'jacoco'
+
 jacoco {
     toolVersion = "0.8.12"
 }
+
 // =======================
 // Common exclusion patterns
 // =======================
@@ -23,14 +25,11 @@ def jacocoExcludes = [
         '**/*_Factory.class',
         '**/*_Provide*Factory.class',
         '**/*Module_*Factory.class',
-        '**/*LambdaLambda',
-        'Lambda*.*',
+        '**/*$Lambda$*.*',
         '**/*Companion.*',
         '**/*$Result.*',
-        '**/*ResultResult',
-        'Result*.*',
-        '**/*∗*',
-        '∗*.*'
+        '**/*$Result$*.*',
+        '**/*$*$*.*'
 ]
 
 // =======================
@@ -38,8 +37,9 @@ def jacocoExcludes = [
 // =======================
 subprojects.each { sub ->
     sub.afterEvaluate {
-// Only Android modules
+        // Only Android modules
         if (sub.plugins.hasPlugin('com.android.application') || sub.plugins.hasPlugin('com.android.library')) {
+
             def variantName = "Debug"
             def testTaskName = "test${variantName}UnitTest"
 
@@ -70,7 +70,9 @@ subprojects.each { sub ->
                     xml.required = true
                     html.required = true
                     csv.required = true
+                    xml.outputLocation = file("${sub.buildDir}/reports/jacoco/debug/jacocoDebugReport.xml")
                     html.outputLocation = file("${sub.buildDir}/reports/jacoco/debug")
+                    csv.outputLocation = file("${sub.buildDir}/reports/jacoco/debug/jacocoDebugReport.csv")
                 }
 
                 doLast {
@@ -80,16 +82,18 @@ subprojects.each { sub ->
         }
     }
 }
+
 // =======================
 // Root-level aggregated Jacoco report
 // =======================
 tasks.register("jacocoProjectReport", JacocoReport) {
     group = "Reporting"
     description = "Aggregated Jacoco report for all modules"
-// Depend on all module-level reports
+
+    // Depend on all module-level reports
     dependsOn(subprojects.collect { it.tasks.matching { it.name == 'jacocoDebugReport' } })
 
-// Collect all execution files
+    // Collect all execution files
     def allExecs = subprojects.collect { sub ->
         fileTree(dir: sub.buildDir, includes: [
                 '**/jacoco/*.exec',
@@ -98,7 +102,7 @@ tasks.register("jacocoProjectReport", JacocoReport) {
     }
     executionData.setFrom(files(allExecs).filter { it.exists() })
 
-// Collect all class files
+    // Collect all class files
     def allClasses = subprojects.collect { sub ->
         files([
                 fileTree(dir: "${sub.buildDir}/intermediates/javac/debug/classes", excludes: jacocoExcludes),
@@ -107,7 +111,7 @@ tasks.register("jacocoProjectReport", JacocoReport) {
     }.flatten()
     classDirectories.setFrom(files(allClasses).filter { it.exists() })
 
-// Collect all source directories
+    // Collect all source directories
     def allSources = subprojects.collect { sub ->
         files(
                 "${sub.projectDir}/src/main/java",
@@ -120,19 +124,25 @@ tasks.register("jacocoProjectReport", JacocoReport) {
         xml.required = true
         html.required = true
         csv.required = true
-        html.outputLocation = file("$buildDir/reports/jacoco/project")
+        xml.outputLocation = file("$buildDir/reports/jacoco/project/jacocoProjectReport.xml")
+        html.outputLocation = file("$buildDir/reports/jacoco/project/html")
+        csv.outputLocation = file("$buildDir/reports/jacoco/project/jacocoProjectReport.csv")
     }
 
     doLast {
         println "Aggregated Jacoco report generated at: ${reports.html.outputLocation.get()}/index.html"
+        println "CSV report: ${reports.csv.outputLocation.get()}"
+        println "XML report: ${reports.xml.outputLocation.get()}"
     }
 }
+
 // =======================
 // Convenience task to open report in browser
 // =======================
 tasks.register("openCoverageReport") {
     group = "Reporting"
     description = "Opens the aggregated HTML coverage report in browser"
+
     dependsOn(tasks.named("jacocoProjectReport"))
 
     doLast {
@@ -155,12 +165,14 @@ tasks.register("openCoverageReport") {
         }
     }
 }
+
 // =======================
 // Task to run tests and generate coverage in one command
 // =======================
 tasks.register("testWithCoverage") {
     group = "Verification"
     description = "Run all debug unit tests and generate coverage report"
+
     dependsOn(subprojects.collect { it.tasks.matching { it.name == 'testDebugUnitTest' } })
     finalizedBy(tasks.named("jacocoProjectReport"))
 
