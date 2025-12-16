@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.detekt)
 }
 
 android {
@@ -39,6 +40,10 @@ android {
     buildFeatures {
         compose = true
     }
+    lint {
+        abortOnError = true
+        warningsAsErrors = true
+    }
 }
 
 dependencies {
@@ -50,21 +55,21 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
 
     implementation(project(":core"))
-
+    detektPlugins(libs.detekt.formatting)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugRuntimeOnly(libs.androidx.compose.ui.test.manifest)
-  implementation("androidx.activity:activity:1.12.1")
-  implementation(libs.androidx.compose.foundation.layout)
-  implementation("androidx.compose.foundation:foundation:1.10.0")
-  implementation(libs.androidx.compose.runtime)
-  implementation("androidx.compose.ui:ui-text:1.10.0")
-  implementation("androidx.navigation:navigation-common:2.9.6")
-  implementation("androidx.navigation:navigation-runtime:2.9.6")
-  androidTestImplementation("androidx.test:monitor:1.8.0")
-  androidTestRuntimeOnly("androidx.test:runner:1.7.0")
-  androidTestImplementation(libs.junit)
-  androidTestRuntimeOnly("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.compose.ui.text)
+    implementation(libs.androidx.navigation.common)
+    implementation(libs.androidx.navigation.runtime)
+    androidTestImplementation(libs.androidx.monitor)
+    androidTestRuntimeOnly(libs.androidx.runner)
+    androidTestImplementation(libs.junit)
+    androidTestRuntimeOnly(libs.kotlinx.coroutines.test)
 }

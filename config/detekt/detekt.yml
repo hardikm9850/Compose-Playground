@@ -1,0 +1,25 @@
+build:
+  maxIssues: 0
+
+formatting:
+  active: true
+  Indentation:
+    active: true
+  MaximumLineLength:
+    active: true
+    maxLineLength: 120
+
+style:
+  MagicNumber:
+    active: false
+
+complexity:
+  LongMethod:
+    threshold: 60
+  LongParameterList:
+    functionThreshold: 10
+
+naming:
+  FunctionNaming:
+    ignoreAnnotated:
+      - Composable

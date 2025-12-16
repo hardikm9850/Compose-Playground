@@ -47,10 +47,8 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-
     @Composable
     fun BottomNavBar(navController: NavHostController) {
-
         var selectedIndex by remember { mutableIntStateOf(0) }
 
         NavigationBar {

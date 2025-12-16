@@ -15,6 +15,8 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Divider
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -64,6 +66,7 @@ fun ToDoScreen() {
     var showSheet by remember { mutableStateOf(false) }
     val lazyColumnState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     if (showSheet) {
         AddToDo({
@@ -73,6 +76,8 @@ fun ToDoScreen() {
             showSheet = false
             coroutineScope.launch {
                 lazyColumnState.animateScrollToItem(todos.size - 1)
+                // show snackbar
+                snackbarHostState.showSnackbar("Item added")
             }
         })
     }
@@ -92,6 +97,12 @@ fun ToDoScreen() {
             }) {
             Text("+", fontSize = 30.sp)
         }
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(16.dp)
+        )
     }
 }
 

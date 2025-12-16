@@ -1,24 +1,41 @@
 [versions]
 agp = "8.13.2"
+detektFormatting = "1.23.8"
+foundation = "1.10.0"
 kotlin = "2.2.21"
 coreKtx = "1.17.0"
+detekt = "1.23.8"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
+kotlinxCoroutinesTest = "1.10.2"
 lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.12.1"
 composeBom = "2025.12.00"
+monitor = "1.8.0"
+navigationCommon = "2.9.6"
 navigationCompose = "2.9.6"
 appcompat = "1.7.1"
 material = "1.13.0"
+runner = "1.7.0"
 runtime = "1.10.0"
 foundationLayout = "1.10.0"
 material3 = "1.4.0"
+uiText = "1.10.0"
 uiToolingPreview = "1.10.0"
 uiTooling = "1.10.0"
+dependencyAnalysis = "3.5.1"
 
 [libraries]
+androidx-activity = { module = "androidx.activity:activity", version.ref = "activityCompose" }
+androidx-compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "foundation" }
+androidx-compose-ui-text = { module = "androidx.compose.ui:ui-text", version.ref = "uiText" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-monitor = { module = "androidx.test:monitor", version.ref = "monitor" }
+androidx-navigation-common = { module = "androidx.navigation:navigation-common", version.ref = "navigationCommon" }
+androidx-navigation-runtime = { module = "androidx.navigation:navigation-runtime", version.ref = "navigationCommon" }
+androidx-runner = { module = "androidx.test:runner", version.ref = "runner" }
+detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detektFormatting" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -34,6 +51,7 @@ androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-te
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtime" }
 androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "foundationLayout" }
@@ -48,4 +66,5 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
-
+dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependencyAnalysis" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
